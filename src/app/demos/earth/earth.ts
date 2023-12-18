@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import GUI from 'lil-gui';
 import { RectAreaLightHelper } from 'three/examples/jsm/Addons.js';
+import earthVertexShader from './shaders/earth/vertex.vs';
+import earthFragmentShader from './shaders/earth/fragment.fs';
 
 export function earth(container: HTMLElement, canvas: HTMLCanvasElement) {
   const scene = new THREE.Scene();
@@ -9,6 +11,8 @@ export function earth(container: HTMLElement, canvas: HTMLCanvasElement) {
 
   const loader = new THREE.TextureLoader();
   const displacement = loader.load('/textures/earth_height_map.jpg');
+  const temperature = loader.load('/textures/earth_temperature.jpg');
+  const snow = loader.load('/textures/earth_snow_map.jpg');
 
   // const ambientLight = new THREE.AmbientLight(0xffffff, 1);
   // scene.add(ambientLight);
@@ -82,13 +86,30 @@ export function earth(container: HTMLElement, canvas: HTMLCanvasElement) {
   const rectAreaLightHelper = new RectAreaLightHelper(rectAreaLight);
   scene.add(rectAreaLightHelper);
 
-  const geometry = new THREE.SphereGeometry(1, 32, 32);
-  const material = new THREE.MeshStandardMaterial({
+  const geometry = new THREE.SphereGeometry(1, 128, 128);
+  // const material = new THREE.MeshStandardMaterial({
+  //   color: 'blue',
+  //   displacementMap: displacement,
+  //   displacementScale: 0.2,
+  //   roughness: 0.4,
+  // });
+  const standardMaterial = new THREE.MeshStandardMaterial({
     color: 'blue',
-    displacementMap: displacement,
-    displacementScale: 0.2,
     roughness: 0.4,
   });
+
+  const material = new THREE.RawShaderMaterial({
+    vertexShader: earthVertexShader,
+    fragmentShader: earthFragmentShader,
+    uniforms: {
+      uDisplacementMap: { value: displacement },
+      uDisplacementScale: { value: 0.1 },
+      uTemperatureMap: { value: temperature },
+      uSnowMap: { value: snow },
+    },
+    transparent: true,
+  });
+
   const cube = new THREE.Mesh(geometry, material);
 
   const cubeTweak = gui.addFolder('Cube');
@@ -97,7 +118,7 @@ export function earth(container: HTMLElement, canvas: HTMLCanvasElement) {
   cubeTweak.add(cube.position, 'y').min(-3).max(3).step(0.01);
   cubeTweak.add(cube.position, 'z').min(-3).max(3).step(0.01);
 
-  const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), material);
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), standardMaterial);
   plane.rotation.x = -Math.PI * 0.5;
   plane.position.y = -1.25;
 
