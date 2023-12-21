@@ -7,6 +7,10 @@ varying float height;
 // varying float temperature;
 varying float snow;
 
+vec3 blend(vec3 color1, vec3 color2, float ratio) {
+  return color1 * ratio + color2 * (1.0 - ratio);
+}
+
 void main()
 {
   vec3 oceanColor = vec3(0.0, 0.0, 0.5);
@@ -24,7 +28,7 @@ void main()
   vec3 color = oceanColor;
 
   if (normalizedHeight >= sandLevel) {
-    color = sandColor;
+    color = blend(sandColor, grassColor, (normalizedHeight - sandLevel) / (grassLevel - sandLevel));
   }
 
   if (normalizedHeight >= grassLevel) {
@@ -35,12 +39,12 @@ void main()
     // } else if (snow > 0.3) {
     //   color = vec3(0.5, 0.5, 0.7);
     // } else {
-    color = grassColor;
+    color = blend(grassColor, rockColor, (normalizedHeight - grassLevel) / (rockLevel - grassLevel));
     // }
   }
 
   if (normalizedHeight >= rockLevel) {
-    color = rockColor;
+    color = blend(rockColor, snowColor, (normalizedHeight - rockLevel) / (snowLevel - rockLevel));
   }
 
   if (normalizedHeight >= snowLevel) {

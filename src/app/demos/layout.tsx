@@ -13,6 +13,7 @@ import {
   XMarkIcon,
   RocketLaunchIcon,
   GlobeAmericasIcon,
+  CloudIcon,
 } from '@heroicons/react/24/outline';
 import classNames from 'classnames';
 import { useRouter, usePathname } from 'next/navigation';
@@ -23,6 +24,7 @@ import Link from 'next/link';
 const navigation = [
   { name: 'Simple cube', href: '/simple-cube', icon: CubeIcon },
   { name: 'Earth', href: '/earth', icon: GlobeAmericasIcon },
+  { name: 'Boids', href: '/boids', icon: CloudIcon },
 ];
 const teams = [
   { id: 1, name: 'Heroicons', href: '#', initial: 'H' },
