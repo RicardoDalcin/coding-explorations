@@ -1,15 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import GUI from 'lil-gui';
-import { RectAreaLightHelper } from 'three/examples/jsm/Addons.js';
-import earthVertexShader from './shaders/earth/vertex.vs';
-import earthFragmentShader from './shaders/earth/fragment.fs';
+import { Boid } from './Boid';
 
 const CONTAINER_SIZE = 8;
-
-const settings = {
-  avoidanceFactor: 0.01,
-};
 
 function getRendering(
   scene: THREE.Scene,
@@ -141,7 +135,8 @@ function getContainer(scene: THREE.Scene, gui: GUI) {
 function spawnBoids(
   quantity: number,
   scene: THREE.Scene,
-  container: THREE.Mesh
+  container: THREE.Mesh,
+  boidSettings: Settings
 ) {
   const COLORS = ['#ff0051', '#f56762', '#a53c6c', '#f19fa0', '#72bdbf'];
   const geometry = new THREE.ConeGeometry(0.1, 0.3, 3);
@@ -149,7 +144,7 @@ function spawnBoids(
   const highlightedMaterial = new THREE.MeshBasicMaterial({ color: 'yellow' });
 
   const boids = [];
-  let hightlightedBoid: THREE.Mesh | null = null;
+  let hightlightedBoid: Boid | null = null;
 
   for (let i = 0; i < quantity; i++) {
     const mesh =
@@ -163,10 +158,12 @@ function spawnBoids(
     mesh.rotation.z = Math.random() * Math.PI * 2;
     mesh.position.set(x, y, 0);
     scene.add(mesh);
-    boids.push(mesh);
+
+    const boid = new Boid(mesh, scene, boidSettings, i === 0);
+    boids.push(boid);
 
     if (i === 0) {
-      hightlightedBoid = mesh;
+      hightlightedBoid = boid;
     }
   }
 
@@ -185,15 +182,6 @@ function getBoidDirection(boid: THREE.Mesh) {
   direction.multiplyScalar(0.005);
 
   return direction;
-}
-
-function getRotationFromDirection(direction: THREE.Vector3) {
-  const rotation = new THREE.Euler();
-
-  rotation.x = Math.atan2(direction.y, direction.z);
-  rotation.y = Math.atan2(direction.x, direction.z);
-
-  return rotation;
 }
 
 function isBoidInCircle(
@@ -219,13 +207,13 @@ function isBoidInCircle(
   return true;
 }
 
-function separation(boid: THREE.Mesh, boids: THREE.Mesh[]) {
+function separation(boid: Boid, boids: Boid[]) {
   const boidsInView = boids.filter((otherBoid) => {
-    if (otherBoid.uuid === boid.uuid) {
+    if (otherBoid.id === boid.id) {
       return false;
     }
 
-    return isBoidInCircle(otherBoid, boid.position, 0.5, Math.PI / 2);
+    return isBoidInCircle(otherBoid.mesh, boid.mesh.position, 0.5, Math.PI / 2);
   });
 
   if (boidsInView.length === 0) {
@@ -235,13 +223,13 @@ function separation(boid: THREE.Mesh, boids: THREE.Mesh[]) {
   let dX = 0;
   let dY = 0;
 
-  const initialRotation = boid.rotation.z;
+  const initialRotation = boid.mesh.rotation.z;
   const boidDirectionX = Math.cos(initialRotation);
   const boidDirectionY = Math.sin(initialRotation);
 
   boidsInView.forEach((otherBoid) => {
-    const otherDirectionX = Math.cos(otherBoid.rotation.z);
-    const otherDirectionY = Math.sin(otherBoid.rotation.z);
+    const otherDirectionX = Math.cos(otherBoid.mesh.rotation.z);
+    const otherDirectionY = Math.sin(otherBoid.mesh.rotation.z);
 
     dX += boidDirectionX - otherDirectionX;
     dY += boidDirectionY - otherDirectionY;
@@ -255,13 +243,21 @@ function separation(boid: THREE.Mesh, boids: THREE.Mesh[]) {
   const angleBetween = Math.abs(newRotation - initialRotation);
 
   if (angleBetween > Math.PI / 180) {
-    boid.rotation.z =
+    boid.mesh.rotation.z =
       (Math.PI / 60) * Math.sign(angleBetween) + initialRotation;
     return;
   }
 
-  boid.rotation.z = newRotation;
+  boid.mesh.rotation.z = newRotation;
 }
+
+export type Settings = {
+  speed: number;
+  turnSpeed: number;
+  viewAngle: number;
+  viewDistance: number;
+  avoidanceFactor: number;
+};
 
 export function boids(
   containerElement: HTMLElement,
@@ -270,6 +266,14 @@ export function boids(
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#03f0fc');
   const gui = new GUI();
+
+  const boidSettings: Settings = {
+    speed: 0.2,
+    turnSpeed: 0.01,
+    viewAngle: Math.PI * 0.5,
+    viewDistance: 0.5,
+    avoidanceFactor: 0.01,
+  };
 
   setupSceneBase(scene);
 
@@ -281,7 +285,12 @@ export function boids(
     containerElement
   );
 
-  const { boids, hightlightedBoid } = spawnBoids(100, scene, container);
+  const { boids, hightlightedBoid } = spawnBoids(
+    100,
+    scene,
+    container,
+    boidSettings
+  );
 
   if (!hightlightedBoid) {
     throw new Error('No hightlighted boid');
@@ -296,13 +305,6 @@ export function boids(
   gui.add(debug, 'fps').listen();
 
   const boidTweak = gui.addFolder('Boid');
-
-  let boidSettings = {
-    speed: 0.2,
-    turnSpeed: 0.01,
-    viewAngle: Math.PI * 0.5,
-    viewDistance: 0.5,
-  };
 
   boidTweak.add(boidSettings, 'speed').min(0).max(0.5).step(0.001);
   boidTweak.add(boidSettings, 'turnSpeed').min(0).max(0.1).step(0.001);
@@ -344,7 +346,7 @@ export function boids(
     .max(1)
     .step(0.001)
     .onChange((value) => {});
-  boidTweak.add(settings, 'avoidanceFactor').min(0).max(0.5).step(0.001);
+  boidTweak.add(boidSettings, 'avoidanceFactor').min(0).max(0.5).step(0.001);
 
   scene.add(viewPie);
 
@@ -360,47 +362,40 @@ export function boids(
     debug.fps = Math.round(fps);
 
     boids.forEach((boid) => {
-      const direction = getBoidDirection(boid);
-      direction.multiplyScalar(delta * 0.2);
-      boid.position.add(direction);
+      boid.update(boids);
 
-      if (boid.position.x > CONTAINER_SIZE / 2) {
-        boid.position.x = -(CONTAINER_SIZE / 2);
-      }
-
-      if (boid.position.x < -(CONTAINER_SIZE / 2)) {
-        boid.position.x = CONTAINER_SIZE / 2;
-      }
-
-      if (boid.position.y > CONTAINER_SIZE / 2) {
-        boid.position.y = -(CONTAINER_SIZE / 2);
-      }
-
-      if (boid.position.y < -(CONTAINER_SIZE / 2)) {
-        boid.position.y = CONTAINER_SIZE / 2;
-      }
-
-      if (boid.position.z > CONTAINER_SIZE / 2) {
-        boid.position.z = -(CONTAINER_SIZE / 2);
-      }
-
-      if (boid.position.z < -(CONTAINER_SIZE / 2)) {
-        boid.position.z = CONTAINER_SIZE / 2;
-      }
-
-      if (boid.uuid === hightlightedBoid?.uuid) {
-        // drawDebug(boid, direction);
-        viewPie.position.copy(boid.position);
-        viewPie.position.z = 0.01;
-        // z needs to point in the same direction as the tip of the cone
-        viewPie.rotation.z =
-          Math.atan2(direction.y, direction.x) - boidSettings.viewAngle / 2;
-        viewPie.rotation.x = boid.rotation.x;
-        viewPie.rotation.y = boid.rotation.y;
-      }
-
-      separation(boid, boids);
-
+      // const direction = getBoidDirection(boid);
+      // direction.multiplyScalar(delta * 0.2);
+      // boid.position.add(direction);
+      // if (boid.position.x > CONTAINER_SIZE / 2) {
+      //   boid.position.x = -(CONTAINER_SIZE / 2);
+      // }
+      // if (boid.position.x < -(CONTAINER_SIZE / 2)) {
+      //   boid.position.x = CONTAINER_SIZE / 2;
+      // }
+      // if (boid.position.y > CONTAINER_SIZE / 2) {
+      //   boid.position.y = -(CONTAINER_SIZE / 2);
+      // }
+      // if (boid.position.y < -(CONTAINER_SIZE / 2)) {
+      //   boid.position.y = CONTAINER_SIZE / 2;
+      // }
+      // if (boid.position.z > CONTAINER_SIZE / 2) {
+      //   boid.position.z = -(CONTAINER_SIZE / 2);
+      // }
+      // if (boid.position.z < -(CONTAINER_SIZE / 2)) {
+      //   boid.position.z = CONTAINER_SIZE / 2;
+      // }
+      // if (boid.uuid === hightlightedBoid?.uuid) {
+      //   // drawDebug(boid, direction);
+      //   viewPie.position.copy(boid.position);
+      //   viewPie.position.z = 0.01;
+      //   // z needs to point in the same direction as the tip of the cone
+      //   viewPie.rotation.z =
+      //     Math.atan2(direction.y, direction.x) - boidSettings.viewAngle / 2;
+      //   viewPie.rotation.x = boid.rotation.x;
+      //   viewPie.rotation.y = boid.rotation.y;
+      // }
+      // separation(boid, boids);
       // boid.rotation.z += (Math.random() - 0.5) * delta * 0.01;
     });
 
