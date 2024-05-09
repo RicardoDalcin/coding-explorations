@@ -41,6 +41,9 @@ dependencies:
   ts-shader-loader:
     specifier: ^2.0.2
     version: 2.0.2
+  wgpu-matrix:
+    specifier: ^2.8.0
+    version: 2.8.0
 
 devDependencies:
   '@types/node':
@@ -3195,6 +3198,10 @@ packages:
       - '@swc/core'
       - esbuild
       - uglify-js
+    dev: false
+
+  /wgpu-matrix@2.8.0:
+    resolution: {integrity: sha512-HSuLmWpr1b1kdBbOYsAZodGmIQjD42Or6vjL39hAAo19E07sgBDAII4rGuP4qr4hsfTsA3OhDJPqMTQ0XLpH9Q==}
     dev: false
 
   /which-boxed-primitive@1.0.2:
