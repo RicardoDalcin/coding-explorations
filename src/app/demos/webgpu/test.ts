@@ -1,4 +1,5 @@
 import shader from "./shader.wgsl";
+import { TriangleMesh } from "./TriangleMesh";
 
 export async function test(container: HTMLElement, canvas: HTMLCanvasElement) {
   container.addEventListener("dblclick", () => {
@@ -24,6 +25,8 @@ export async function test(container: HTMLElement, canvas: HTMLCanvasElement) {
     alphaMode: "premultiplied",
   });
 
+  const triangleMesh = new TriangleMesh(device);
+
   const bindGroupLayout = device.createBindGroupLayout({
     entries: [],
   });
@@ -44,6 +47,7 @@ export async function test(container: HTMLElement, canvas: HTMLCanvasElement) {
         code: shader,
       }),
       entryPoint: "vs_main",
+      buffers: [triangleMesh.bufferLayout],
     },
     fragment: {
       module: device.createShaderModule({
@@ -77,6 +81,7 @@ export async function test(container: HTMLElement, canvas: HTMLCanvasElement) {
     });
     passEncoder.setPipeline(pipeline);
     passEncoder.setBindGroup(0, bindGroup);
+    passEncoder.setVertexBuffer(0, triangleMesh.buffer);
     passEncoder.draw(3);
     passEncoder.end();
 
