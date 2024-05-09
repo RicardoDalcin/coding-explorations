@@ -1,35 +1,31 @@
-'use client';
-import { Fragment, useState } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+"use client";
+import { Fragment, useState } from "react";
+import { Dialog, Transition } from "@headlessui/react";
 import {
   Bars3Icon,
-  CalendarIcon,
-  ChartPieIcon,
   CubeIcon,
-  DocumentDuplicateIcon,
-  FolderIcon,
-  HomeIcon,
-  UsersIcon,
   XMarkIcon,
   RocketLaunchIcon,
   GlobeAmericasIcon,
   CloudIcon,
-} from '@heroicons/react/24/outline';
-import classNames from 'classnames';
-import { useRouter, usePathname } from 'next/navigation';
-import Image from 'next/image';
-import { GithubIcon } from '@/components/GithubIcon';
-import Link from 'next/link';
+  BeakerIcon,
+} from "@heroicons/react/24/outline";
+import classNames from "classnames";
+import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
+import { GithubIcon } from "@/components/GithubIcon";
+import Link from "next/link";
 
 const navigation = [
-  { name: 'Simple cube', href: '/simple-cube', icon: CubeIcon },
-  { name: 'Earth', href: '/earth', icon: GlobeAmericasIcon },
-  { name: 'Boids', href: '/boids', icon: CloudIcon },
+  { name: "Simple cube", href: "/simple-cube", icon: CubeIcon },
+  { name: "Earth", href: "/earth", icon: GlobeAmericasIcon },
+  { name: "Boids", href: "/boids", icon: CloudIcon },
+  { name: "WebGPU", href: "/webgpu", icon: BeakerIcon },
 ];
 const teams = [
-  { id: 1, name: 'Heroicons', href: '#', initial: 'H' },
-  { id: 2, name: 'Tailwind Labs', href: '#', initial: 'T' },
-  { id: 3, name: 'Workcation', href: '#', initial: 'W' },
+  { id: 1, name: "Heroicons", href: "#", initial: "H" },
+  { id: 2, name: "Tailwind Labs", href: "#", initial: "T" },
+  { id: 3, name: "Workcation", href: "#", initial: "W" },
 ];
 
 const ProjectHandle = ({ className }: { className?: string }) => (
@@ -50,7 +46,7 @@ const GithubHandle = ({ className }: { className?: string }) => (
       rel="noopener noreferrer"
       className={classNames(
         className,
-        'flex items-center gap-x-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50 rounded-md'
+        "flex items-center gap-x-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50 rounded-md"
       )}
     >
       <GithubIcon className="h-6 w-6 fill-slate-900" />
@@ -140,18 +136,18 @@ export default function SideBarlayout({
                                     href={`/demos${item.href}`}
                                     className={classNames(
                                       isActive
-                                        ? 'bg-gray-50 text-indigo-600'
-                                        : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                                      'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                        ? "bg-gray-50 text-indigo-600"
+                                        : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50",
+                                      "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                                     )}
                                   >
                                     {item.icon && (
                                       <item.icon
                                         className={classNames(
                                           isActive
-                                            ? 'text-indigo-600'
-                                            : 'text-gray-400 group-hover:text-indigo-600',
-                                          'h-6 w-6 shrink-0'
+                                            ? "text-indigo-600"
+                                            : "text-gray-400 group-hover:text-indigo-600",
+                                          "h-6 w-6 shrink-0"
                                         )}
                                         aria-hidden="true"
                                       />
@@ -177,17 +173,17 @@ export default function SideBarlayout({
                                     href={team.href}
                                     className={classNames(
                                       isActive
-                                        ? 'bg-gray-50 text-indigo-600'
-                                        : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                                      'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                        ? "bg-gray-50 text-indigo-600"
+                                        : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50",
+                                      "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                                     )}
                                   >
                                     <span
                                       className={classNames(
                                         isActive
-                                          ? 'text-indigo-600 border-indigo-600'
-                                          : 'text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600',
-                                        'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white'
+                                          ? "text-indigo-600 border-indigo-600"
+                                          : "text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600",
+                                        "flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white"
                                       )}
                                     >
                                       {team.initial}
@@ -232,18 +228,18 @@ export default function SideBarlayout({
                             href={`/demos${item.href}`}
                             className={classNames(
                               isActive
-                                ? 'bg-gray-50 text-indigo-600'
-                                : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                              'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                ? "bg-gray-50 text-indigo-600"
+                                : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50",
+                              "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                             )}
                           >
                             {item.icon && (
                               <item.icon
                                 className={classNames(
                                   isActive
-                                    ? 'text-indigo-600'
-                                    : 'text-gray-400 group-hover:text-indigo-600',
-                                  'h-6 w-6 shrink-0'
+                                    ? "text-indigo-600"
+                                    : "text-gray-400 group-hover:text-indigo-600",
+                                  "h-6 w-6 shrink-0"
                                 )}
                                 aria-hidden="true"
                               />
@@ -268,17 +264,17 @@ export default function SideBarlayout({
                             href={team.href}
                             className={classNames(
                               isActive
-                                ? 'bg-gray-50 text-indigo-600'
-                                : 'text-gray-700 hover:text-indigo-600 hover:bg-gray-50',
-                              'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                ? "bg-gray-50 text-indigo-600"
+                                : "text-gray-700 hover:text-indigo-600 hover:bg-gray-50",
+                              "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
                             )}
                           >
                             <span
                               className={classNames(
                                 isActive
-                                  ? 'text-indigo-600 border-indigo-600'
-                                  : 'text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600',
-                                'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white'
+                                  ? "text-indigo-600 border-indigo-600"
+                                  : "text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600",
+                                "flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white"
                               )}
                             >
                               {team.initial}
