@@ -3,17 +3,17 @@ import { useCallback, useEffect, useRef } from 'react';
 import { Noise } from './Noise';
 import { Vec2 } from './engine/linear';
 
+const DEVICE_ID = '';
+
 export default function SimpleCube() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   async function getLocalStream() {
     try {
-      // use focusrite for audio input
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           deviceId: {
-            exact:
-              'c8af0d2300c3675bef1fb7923c894dc153e1babf82b07605672c8117d61bccbd',
+            exact: DEVICE_ID,
           },
         },
         video: false,
@@ -132,12 +132,7 @@ export default function SimpleCube() {
     const devices = await navigator.mediaDevices.enumerateDevices();
     console.log(devices);
 
-    // get focusrite id c8af0d2300c3675bef1fb7923c894dc153e1babf82b07605672c8117d61bccbd
-    const focusrite = devices.find(
-      (device) =>
-        device.deviceId ===
-        'c8af0d2300c3675bef1fb7923c894dc153e1babf82b07605672c8117d61bccbd'
-    );
+    const focusrite = devices.find((device) => device.deviceId === DEVICE_ID);
 
     console.log(focusrite);
 
